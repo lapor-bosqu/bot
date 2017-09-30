@@ -1,3 +1,27 @@
+var express = require('express');
+var path = require('path');
+var favicon = require('serve-favicon');
+var logger = require('morgan');
+var cookieParser = require('cookie-parser');
+var bodyParser = require('body-parser');
+
+var index = require('./routes/index');
+var users = require('./routes/users');
+
+var app = express();
+
+// view engine setup
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
+
+// uncomment after placing your favicon in /public
+//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+app.use(logger('dev'));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'public')));
+
 const TelegramBot = require('node-telegram-bot-api');
 const fs = require('fs');
 const crypto = require('crypto');
@@ -38,7 +62,7 @@ bot.on('message', (msg) => {
 
   if (step === 5 && msg.photo) {
     console.log('lapor-bosqu-log: ' + JSON.stringify(msg)); // DEBUG
-    bot.downloadFile(msg.photo[0].file_id, 'uploads').then(function(filePath) {
+    bot.downloadFile(msg.photo[0].file_id, 'public/images').then(function(filePath) {
       newReport[4] = filePath;
       console.log('lapor-bosqu-log: Screenshot saved: ' + filePath); // DEBUG
       bot.sendMessage(chatId, 'Makasih ya, bug report kamu sudah aku terima:\n' +
@@ -126,3 +150,27 @@ function saveBugReport() {
   });
   console.log('lapor-bosqu-log: Save End'); // DEBUG
 }
+
+
+app.use('/', index);
+app.use('/users', users);
+
+// catch 404 and forward to error handler
+app.use(function(req, res, next) {
+  var err = new Error('Not Found');
+  err.status = 404;
+  next(err);
+});
+
+// error handler
+app.use(function(err, req, res, next) {
+  // set locals, only providing error in development
+  res.locals.message = err.message;
+  res.locals.error = req.app.get('env') === 'development' ? err : {};
+
+  // render the error page
+  res.status(err.status || 500);
+  res.render('error');
+});
+
+module.exports = app;
