@@ -1,6 +1,7 @@
 const TelegramBot = require('node-telegram-bot-api');
 const fs = require('fs');
 const sleep = require('sleep');
+const crypto = require('crypto');
 
 const token = '344645337:AAEDZfgYCoy7Z2RTSjECcnPEmUvx6dODf5U';
 
@@ -104,7 +105,9 @@ bot.on('message', (msg) => {
 
 function saveBugReport() {
   console.log('lapor-bosqu-log: Save Start'); // DEBUG
+  var random_id = crypto.randomBytes(8);
   var newBugReport = {
+    id: random_id.toString('hex'),
     mode: mode,
     platform: newReport[0],
     user_agent: newReport[1],
