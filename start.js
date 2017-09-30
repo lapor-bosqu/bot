@@ -1,5 +1,6 @@
 const TelegramBot = require('node-telegram-bot-api');
 const fs = require('fs');
+const sleep = require('sleep');
 
 const token = '344645337:AAEDZfgYCoy7Z2RTSjECcnPEmUvx6dODf5U';
 
@@ -9,8 +10,10 @@ const bot = new TelegramBot(token, {
 });
 
 var step = 0;
-var reports = [];
+var newReport = [];
 var mode = 'none';
+var bugReports = JSON.parse(fs.readFileSync('db/data.json'));
+console.log('lapor-bosqu-log: bugReports: ' + JSON.stringify(bugReports)); // DEBUG
 
 bot.on('message', (msg) => {
   const chatId = msg.chat.id;
@@ -27,7 +30,7 @@ bot.on('message', (msg) => {
       bot.sendMessage(chatId, 'Operating system kamu apa?'); // Q1 // Windows, OSX, or Linux
     }
     else {
-      console.log('lapor-bosqu-log: ' + JSON.stringify(msg) + ' // ' + step + ' // ' + mode + ' // ' + JSON.stringify(reports)) // DEBUG
+      console.log('lapor-bosqu-log: Sori: ' + JSON.stringify(msg) + ' // ' + step + ' // ' + mode + ' // ' + JSON.stringify(newReport)) // DEBUG
       bot.sendMessage(chatId, 'Sori, aku nggak pernah bisa ngertiin kamu maunya apaa...');
     }
     return;
@@ -36,8 +39,16 @@ bot.on('message', (msg) => {
   if (step === 5 && msg.photo) {
     console.log('lapor-bosqu-log: ' + JSON.stringify(msg)); // DEBUG
     bot.downloadFile(msg.photo[0].file_id, 'uploads').then(function(filePath) {
-      reports[4] = filePath;
+      newReport[4] = filePath;
       console.log('lapor-bosqu-log: Screenshot saved: ' + filePath); // DEBUG
+      bot.sendMessage(chatId, 'Makasih ya, bug report kamu sudah aku terima:\n' +
+        'Platform/OS: ' + newReport[0] + '\n' +
+        'Versi apps/browser: ' + newReport[1] + '\n' +
+        'Judul bug report: ' + newReport[2] + '\n' +
+        'Repro: ' + newReport[3] + '\n' +
+        'Screenshot: ' + newReport[4]); // Summary & End
+      saveBugReport();
+      bot.sendPhoto(chatId, 'assets/tengkyu-bosqu.jpg');
     });
   }
 
@@ -45,88 +56,71 @@ bot.on('message', (msg) => {
     switch (step) {
       case 1:
         step++;
-        reports[0] = msg.text;
+        newReport[0] = msg.text;
         bot.sendMessage(chatId, 'Versi apps-nya apa?'); // Q2
         break;
       case 2:
         step++;
-        reports[1] = msg.text;
+        newReport[1] = msg.text;
         bot.sendMessage(chatId, 'Kasih judul ya untuk report ini'); // Q3
         break;
       case 3:
         step++;
-        reports[2] = msg.text;
+        newReport[2] = msg.text;
         bot.sendMessage(chatId, 'Gimana langkah-langkah terjadi bug-nya (repro)?'); // Q4
         break;
       case 4:
         step++;
-        reports[3] = msg.text;
+        newReport[3] = msg.text;
         bot.sendMessage(chatId, 'Minta screenshot layar kamu ya'); // Q5
         break;
-      case 5:
-        bot.sendMessage(chatId, 'Makasih ya, bug report kamu sudah aku terima:\n' +
-          'Platform: ' + reports[0] + '\n' +
-          'Versi apps: ' + reports[1] + '\n' +
-          'Judul bug report: ' + reports[2] + '\n' +
-          'Repro: ' + reports[3] + '\n' +
-          'Screenshot: ' + reports[4]); // Summary & End
-        saveBugReport();
-        bot.sendPhoto(chatId, 'assets/tengkyu-bosqu.jpg');
     }
   }
   else { // mode === 'reportdesktop'
     switch (step) {
       case 1:
         step++;
-        reports[0] = msg.text;
+        newReport[0] = msg.text;
         bot.sendMessage(chatId, 'Browser kamu apa?'); // Q2
         break;
       case 2:
         step++;
-        reports[1] = msg.text;
+        newReport[1] = msg.text;
         bot.sendMessage(chatId, 'Kasih judul ya untuk report ini'); // Q3
         break;
       case 3:
         step++;
-        reports[2] = msg.text;
+        newReport[2] = msg.text;
         bot.sendMessage(chatId, 'Gimana langkah-langkah terjadi bug-nya (repro)?'); // Q4
         break;
       case 4:
         step++;
-        reports[3] = msg.text;
+        newReport[3] = msg.text;
         bot.sendMessage(chatId, 'Minta screenshot layar kamu ya'); // Q5
         break;
-      case 5:
-        bot.sendMessage(chatId, 'Makasih ya, bug report kamu sudah aku terima:\n' +
-          'OS: ' + reports[0] + '\n' +
-          'Browser: ' + reports[1] + '\n' +
-          'Judul bug report: ' + reports[2] + '\n' +
-          'Repro: ' + reports[3] + '\n' +
-          'Screenshot: ' + reports[4]); // Summary & End
-        saveBugReport();
-        bot.sendPhoto(chatId, 'assets/tengkyu-bosqu.jpg');
     }
   }
 });
 
 function saveBugReport() {
   console.log('lapor-bosqu-log: Save Start'); // DEBUG
-  var bugReport = {
+  var newBugReport = {
     mode: mode,
-    platform: reports[0],
-    user_agent: reports[1],
-    title: reports[2],
-    repro: reports[3],
-    screenshot: 'TBA'
+    platform: newReport[0],
+    user_agent: newReport[1],
+    title: newReport[2],
+    repro: newReport[3],
+    screenshot: newReport[4]
   };
-  fs.appendFile('db/data.json', JSON.stringify(bugReport) + '\n', function(err) {
+  bugReports.push(newBugReport);
+  fs.writeFileSync('db/data.json', JSON.stringify(bugReports), function(err) {
     if (err) {
       return console.log(err);
     }
     console.log('lapor-bosqu-log: Append new data to db/data.json'); // DEBUG
     step = 0;
     mode = 'none';
-    reports = [];
+    newReport = [];
   });
   console.log('lapor-bosqu-log: Save End'); // DEBUG
 }
