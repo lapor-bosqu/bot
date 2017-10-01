@@ -59,7 +59,7 @@ bot.on('message', (msg) => {
 
   if (step === 5 && msg.photo) {
     console.log('lapor-bosqu-log +++++++: ' + JSON.stringify(msg)); // DEBUG
-    bot.downloadFile(msg.photo[0].file_id, 'public/images').then(function(filePath) {
+    bot.downloadFile(msg.photo[msg.photo.length - 1].file_id, 'public/images').then(function(filePath) {
       newReport[4] = filePath;
       console.log('lapor-bosqu-log: Screenshot saved: ' + filePath); // DEBUG
       bot.sendMessage(chatId, 'Makasih ya, bug report kamu sudah aku terima:\n' +
@@ -67,7 +67,7 @@ bot.on('message', (msg) => {
         'Versi apps/browser: ' + newReport[1] + '\n' +
         'Judul bug report: ' + newReport[2] + '\n' +
         'Repro: ' + newReport[3] + '\n' +
-        'Screenshot: ' + newReport[4].replace('public/images', '')); // Summary & End
+        'Screenshot: ' + newReport[4].replace('public/images/', '')); // Summary & End
       saveBugReport();
       bot.sendPhoto(chatId, 'assets/tengkyu-bosqu.jpg');
     });
@@ -132,7 +132,7 @@ function saveBugReport() {
     user_agent: newReport[1],
     title: newReport[2],
     repro: newReport[3],
-    screenshot: newReport[4].replace('public/images', '')
+    screenshot: newReport[4].replace('public/images/', '')
   };
 
   bugReports.push(newBugReport);
