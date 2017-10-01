@@ -4,11 +4,15 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var cors = require('cors')
+
 
 var index = require('./routes/index');
 var users = require('./routes/users');
 
 var app = express();
+app.use(cors())
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -17,8 +21,8 @@ app.set('view engine', 'ejs');
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json({limit: '50mb'}));
+app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -61,7 +65,7 @@ bot.on('message', (msg) => {
   }
 
   if (step === 5 && msg.photo) {
-    console.log('lapor-bosqu-log: ' + JSON.stringify(msg)); // DEBUG
+    console.log('lapor-bosqu-log +++++++: ' + JSON.stringify(msg)); // DEBUG
     bot.downloadFile(msg.photo[0].file_id, 'public/images').then(function(filePath) {
       newReport[4] = filePath;
       console.log('lapor-bosqu-log: Screenshot saved: ' + filePath); // DEBUG
@@ -138,17 +142,21 @@ function saveBugReport() {
     repro: newReport[3],
     screenshot: newReport[4]
   };
+
   bugReports.push(newBugReport);
-  fs.writeFileSync('db/data.json', JSON.stringify(bugReports), function(err) {
+
+  console.log('bugReports : ', bugReports);
+  fs.writeFileSync('db/data.json', JSON.stringify(bugReports), 'utf-8',function(err) {
     if (err) {
-      return console.log(err);
+      console.log(err);
     }
     console.log('lapor-bosqu-log: Append new data to db/data.json'); // DEBUG
     step = 0;
     mode = 'none';
     newReport = [];
+    console.log('lapor-bosqu-log: Save End'); // DEBUG
+
   });
-  console.log('lapor-bosqu-log: Save End'); // DEBUG
 }
 
 

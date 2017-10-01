@@ -62,3 +62,6 @@ _notes.txt
 
 # macOS file system temp
 .DS_STORE
+
+public/images/
+db/data.json
