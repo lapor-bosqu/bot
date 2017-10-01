@@ -172,6 +172,13 @@ router.get('/report/:id', function(req, res) {
   res.json(report)
 })
 
+router.post('/validate', function(req, res) {
+  let bugReports = JSON.parse(fs.readFileSync('db/data.json'));
+  let report = _.find(bugReports, {
+    'id': req.params.id
+  })
+})
+
 router.post('/report', function(req, res) {
   var image = req.body.b64Image
 
@@ -202,7 +209,7 @@ router.post('/report', function(req, res) {
     })
 
     bot.sendMessage(personId, 'Bug report kamu sudah aku terima ya Bos Qu :\n' +
-      'Browser : ' + req.body.platform + '\n' +
+      'Platform : ' + req.body.platform + '\n' +
       'Versi apps/browser: ' + req.body.user_agent + '\n' +
       'Judul bug report: ' + req.body.title + '\n' +
       'Repro: ' + req.body.repro + '\n' +
