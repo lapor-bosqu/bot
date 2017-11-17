@@ -20,7 +20,8 @@ const bot = new TelegramBot(token, {
 
 
 // console.log('lapor-bosqu-log: bugReports: ' + JSON.stringify(bugReports)); // DEBUG
-let hostURL = 'http://udin.us:3000'
+let hostURL = 'https://udin.us/lapor'
+const firebaseHostURL = 'https://lapor-bosqu.firebaseapp.com'
 
 // id chat
 let groupId = '-294843717' // anggaplah grup SHG
@@ -176,19 +177,24 @@ router.post('/report', function(req, res) {
       }
 
       console.log('req.body.title inserted', report)
+
+      bot.sendMessage(groupId, `Hallo squad DTB yang keceh abis, ada yg lapor nih bos qu. \n 
+      Katanya ada bug di platform : ${report.platform} \n
+      tentang : ${report.title} \n
+      ini dia screenshotnya  bos qu : ${hostURL}/images/${fileName}
+      lebih detailnya lihat kesini kuy : ${firebaseHostURL}/report/${report.id} `).then(() => {
+  
+      }).catch(err => {
+        console.log('error when trying to sent : ', err)
+      })
+
       resultResponse.success = true
       resultResponse.message = 'success save report'
       resultResponse.report = report
       res.json(resultResponse)
     })
 
-    bot.sendMessage(groupId, `Hallo squad DTB yang keceh abis, ada yg lapor nih bos qu.
-    Katanya ada bug di https://bukalapak.com/products :
-     icon Kategori nya salah, ini dia SS bos qu : ${hostURL}/images/${fileName}`).then(() => {
 
-    }).catch(err => {
-      console.log('error when trying to sent : ', err)
-    })
     console.log('executed');
   });
 })
