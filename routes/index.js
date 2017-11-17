@@ -44,7 +44,7 @@ router.get('/', function(req, res, next) {
 
 router.get('/reports', function(req, res) {
 
-  reportsDB.find({}, (err, reports) => {
+  reportsDB.find({}).sort({ createdAt: -1 }).exec((err, reports) => {
     console.log('reports : ', reports)
     res.json(reports)
   })
