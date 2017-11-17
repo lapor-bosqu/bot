@@ -103,7 +103,8 @@ router.post('/validate', function(req, res) {
 router.post('/report', function(req, res) {
   let resultResponse = {
     success: false,
-    message: 'error'
+    message: 'error',
+    report: null
   }
   var image = req.body.base64Image
 
@@ -155,6 +156,7 @@ router.post('/report', function(req, res) {
       console.log('req.body.title inserted', report)
       resultResponse.success = true
       resultResponse.message = 'success save report'
+      resultResponse.report = report
       res.json(resultResponse)
     })
 
