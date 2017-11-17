@@ -19,12 +19,12 @@ bot.on('message', (msg) => {
   const chatId = msg.chat.id;
 
   if (step === 0 && mode === 'none') {
-    if (msg.text.match(/\/reportapp/)) {
+    if (msg.text.match(/reportapp/)) {
       step = 1;
       mode = 'reportapp';
       bot.sendMessage(chatId, 'Kamu pakai Android atau iOS?'); // Q1 // Android or iOS
     }
-    else if (msg.text.match(/\/reportdesktop/)) {
+    else if (msg.text.match(/reportdesktop/)) {
       step = 1;
       mode = 'reportdesktop';
       bot.sendMessage(chatId, 'Operating system kamu apa?'); // Q1 // Windows, OSX, or Linux
