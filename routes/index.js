@@ -95,7 +95,8 @@ router.get('/report/:id/convert-to-jira', function(req, res){
             id: req.params.id
           }, {
             $set: {
-              jiraIssue: newIssue
+              jiraIssue: newIssue,
+              status: 'in-progress'
             }
           }, {}, (err, newReport) => {
             console.log('new report after update : ', newReport)
