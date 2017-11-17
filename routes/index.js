@@ -50,11 +50,15 @@ router.get('/reports', function(req, res) {
 })
 
 router.get('/report/:id', function(req, res) {
-  let bugReports = JSON.parse(fs.readFileSync('db/data.json'));
-  let report = _.find(bugReports, {
-    'id': req.params.id
+  reportsDB.findOne({
+    id: req.params.id
+  }, (err, report) => {
+    if(report) {
+      res.json(report)
+    } else {
+      res.json({})
+    }
   })
-  res.json(report)
 })
 
 // jira.issue.getIssue({
@@ -68,9 +72,11 @@ router.get('/report/:id', function(req, res) {
 // })
 
 router.get('/report/:id/convert-to-jira', function(req, res){
-
-  if(reports.length > 0) {
-    jira.issue.createIssue({
+  reportsDB.findOne({
+    id: req.params.id
+  }, (err, report) => {
+    if(report) {
+      jira.issue.createIssue({
         fields: {
           issuetype: {
             id: "10004"
@@ -78,22 +84,28 @@ router.get('/report/:id/convert-to-jira', function(req, res){
           project: {
             id: "10000"
           },
-          summary: "ini bug dari lapor bosqu"
+          summary: report.title || "ini bug dari lapor bosqu"
         } 
       }, function(err, newIssue) {
         if(err) {
           console.log('err : ', err, err.errors)
         } else {
-          console.log('new issue : ', newIssue)          
+          console.log('new issue : ', newIssue)
+          res.json({
+            success: true,
+            message: 'success convert to jira ',
+            newIssue: newIssue
+          })     
         }
       })
-  } else {
-    res.json({
-      success: true,
-      msg: 'not found report with id : ' + req.params.id
-    })
-  }
-
+      
+    } else {
+      res.json({
+        success: false,
+        message: 'not found report with id : ' + req.params.id
+      })
+    }
+  })
 })
 
 router.post('/validate', function(req, res) {
