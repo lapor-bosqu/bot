@@ -91,6 +91,15 @@ router.get('/report/:id/convert-to-jira', function(req, res){
           console.log('err : ', err, err.errors)
         } else {
           console.log('new issue : ', newIssue)
+          reportsDB.update({
+            id: req.params.id
+          }, {
+            $set: {
+              jiraIssue: newIssue
+            }
+          }, {}, (err, newReport) => {
+            console.log('new report after update : ', newReport)
+          })
           res.json({
             success: true,
             message: 'success convert to jira ',
@@ -182,6 +191,5 @@ router.post('/report', function(req, res) {
     console.log('executed');
   });
 })
-
 
 module.exports = router;
