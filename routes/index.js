@@ -85,13 +85,27 @@ router.get('/report/:id/convert-to-jira', function(req, res){
           project: {
             id: "10000"
           },
-          summary: report.title || "ini bug dari lapor bosqu"
+          summary: report.title || "ini bug dari lapor bosqu",
+          description: report.repro
         } 
       }, function(err, newIssue) {
         if(err) {
           console.log('err : ', err, err.errors)
         } else {
           console.log('new issue : ', newIssue)
+          // attach file if exist
+          if(report.screenshot) {
+            jira.issue.addAttachment({
+              filename: './public/images/' + report.screenshot,
+              issueKey: newIssue.key
+            }, function(err, attachedFile) {
+              if(err) {
+                console.log('error when trying to attach an image : ', err)
+              } else {
+                console.log('success attach an image to the issue : ', attachedFile)
+              }
+            })
+          }
           reportsDB.update({
             id: req.params.id
           }, {
